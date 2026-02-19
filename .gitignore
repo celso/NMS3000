@@ -1,0 +1,3 @@
+schematics/NMS3000-backups
+schematics/*.lck
+server/node_modules
