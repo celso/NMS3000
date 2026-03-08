@@ -19,7 +19,7 @@ With links to datasheets.
 
 The KiCad files can be found in the [KiCad project directory](./schematics). A PDF rendering version can be found [here](./schematics/NMS3000.pdf).
 
-I reverse engineered the PCB by tracing all the wires and components, measuring signals with the oscilloscope and looking at datasheets. The KiCad Electrical Rules Checker shows no errors. I'm fairly confident that the schematics are correct but if you find any errors or have any suggestions, please let me know or PR this repo.
+I reverse engineered the PCB by tracing all the wires and components, measuring signals with the scope and looking at datasheets. The KiCad Electrical Rules Checker shows no errors and I'm fairly confident that the schematics are correct but if you find any errors or have any suggestions, please let me know or PR this repo.
 
 ## ROM
 
