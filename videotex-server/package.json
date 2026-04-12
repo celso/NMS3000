@@ -12,14 +12,19 @@
     "types": "wrangler types"
   },
   "dependencies": {
+    "install": "^0.13.0",
+    "npm": "^11.11.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-use-websocket": "^3.0.0"
+    "react-use-websocket": "^4.0.0",
+    "serialport": "^13.0.0",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.26.1",
     "@cloudflare/workers-types": "^4.20260306.1",
     "@eslint/js": "^9.39.1",
+    "@techandsoftware/image-to-sextants": "^1.0.0",
     "@techandsoftware/teletext": "^1.2.0",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",

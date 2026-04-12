@@ -5,7 +5,13 @@
     "types": [
       "@cloudflare/workers-types/2023-07-01",
       "vite/client"
-    ]
+    ],
+
+    /* Path aliases */
+    "baseUrl": ".",
+    "paths": {
+      "~lib/*": ["lib/*"]
+    }
   },
-  "include": ["worker", "worker-configuration.d.ts"]
+  "include": ["worker", "worker-configuration.d.ts", "lib"]
 }

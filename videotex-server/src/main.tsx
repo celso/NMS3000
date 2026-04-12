@@ -7,9 +7,17 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 import "./main.css";
 
 function App() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const teletextRef = useRef<TeletextScreen | null>(null);
+  const [showGrid, setShowGrid] = useState(false);
+  const [powerOn, setPowerOn] = useState(true);
+
   const wsUrl = `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/ws`;
 
-  const { sendMessage, lastMessage, readyState } = useWebSocket(wsUrl);
+  const { getWebSocket, sendJsonMessage, lastJsonMessage, readyState } =
+    useWebSocket(powerOn ? wsUrl : null, {
+      shouldReconnect: (closeEvent) => false,
+    });
 
   const connectionStatus = {
     [ReadyState.CONNECTING]: "Connecting",
@@ -21,7 +29,7 @@ function App() {
 
   const sendKey = useCallback((key: string) => {
     if (readyState === ReadyState.OPEN) {
-      sendMessage(JSON.stringify({ type: "key", key }));
+      sendJsonMessage({ type: "key", key });
     }
   }, []);
 
@@ -36,7 +44,7 @@ function App() {
         sendKey("Enter");
       } else if (e.key.length === 1) {
         // Single printable character (letters, digits, symbols, space)
-        sendMessage(JSON.stringify({ type: "key", key: e.key }));
+        sendJsonMessage({ type: "key", key: e.key });
       }
     };
 
@@ -45,24 +53,25 @@ function App() {
   }, [sendKey]);
 
   useEffect(() => {
-    if (!teletextRef.current || !lastMessage?.data) return;
-    const payload = JSON.parse(lastMessage?.data || "{}");
-    if (payload.type == "frame") {
-      const screen = teletextRef.current;
-      screen.clearScreen(false);
-      screen.setPageRows(payload.rows);
+    if (!teletextRef.current || !lastJsonMessage) return;
+        const screen = teletextRef.current;
+    switch (lastJsonMessage?.type) {
+      case "frame":
+        screen.clearScreen(false);
+        screen.setPageRows(lastJsonMessage.data);
+        break;
+      case "row":
+        //screen.clearScreen(false);
+        screen.setRow(lastJsonMessage.row, lastJsonMessage.data)
+        break;
     }
-  }, [lastMessage]);
+  }, [lastJsonMessage]);
 
   useEffect(() => {
     if (readyState === ReadyState.OPEN) {
-      sendMessage(JSON.stringify({ type: "init" }));
+      sendJsonMessage({ type: "init" });
     }
   }, [readyState]);
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const teletextRef = useRef<TeletextScreen | null>(null);
-  const [showGrid, setShowGrid] = useState(false);
 
   // Initialize the teletext screen once
   useEffect(() => {
@@ -86,24 +95,44 @@ function App() {
     }
   }, []);
 
+  const handlePowerToggle = () => {
+    setPowerOn((prev) => !prev);
+  };
+
   return (
     <div className="app">
-      <div className="viewer-area">
-        <p>{connectionStatus}</p>
-        <div className="viewer-container">
-          <div
-            id="teletext-display"
-            className="teletext-screen"
-            ref={containerRef}
-          />
-          <div className="controls">
+      <div className="crt-tv">
+        <div className="crt-body">
+          <div className="crt-screen-frame">
+            <div className={`crt-screen ${!powerOn ? "off" : ""}`}>
+              <div
+                id="teletext-display"
+                className="teletext-screen"
+                ref={containerRef}
+              />
+              <div className="crt-overlay" />
+            </div>
+          </div>
+          <div className="crt-panel">
             <button
-              onClick={handleToggleGrid}
-              className={showGrid ? "active" : ""}
-            >
-              Grid
-            </button>
-            <button>{connectionStatus}</button>
+              onClick={() => handlePowerToggle()}
+              className={`crt-power ${powerOn ? "on" : ""}`}
+              title="Power"
+            />
+            <div className="crt-panel-right">
+              <div className="crt-knobs">
+                <button
+                  onClick={handleToggleGrid}
+                  className={`crt-knob ${showGrid ? "active" : ""}`}
+                  title="Toggle Grid"
+                />
+                <div
+                  className={`crt-indicator ${readyState === ReadyState.OPEN ? "on" : ""}`}
+                  title={connectionStatus}
+                />
+                <div className="crt-channel-label" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
