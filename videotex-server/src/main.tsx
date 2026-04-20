@@ -9,6 +9,7 @@ import "./main.css";
 function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const teletextRef = useRef<TeletextScreen | null>(null);
+  const screenRef = useRef(new Array(24));
   const [showGrid, setShowGrid] = useState(false);
   const [powerOn, setPowerOn] = useState(true);
 
@@ -54,15 +55,26 @@ function App() {
 
   useEffect(() => {
     if (!teletextRef.current || !lastJsonMessage) return;
-        const screen = teletextRef.current;
+    const screen = teletextRef.current;
+    const buf = screenRef.current;
     switch (lastJsonMessage?.type) {
       case "frame":
         screen.clearScreen(false);
         screen.setPageRows(lastJsonMessage.data);
         break;
+      case "clear":
+        screen.clearScreen(false);
+        break;
       case "row":
         //screen.clearScreen(false);
-        screen.setRow(lastJsonMessage.row, lastJsonMessage.data)
+        console.log(lastJsonMessage);
+        const existing = buf[lastJsonMessage.row];
+        const merged =
+          existing && existing.length > lastJsonMessage.data.length
+            ? lastJsonMessage.data + existing.slice(lastJsonMessage.data.length)
+            : lastJsonMessage.data;
+        screen.setRow(lastJsonMessage.row, merged);
+        buf[lastJsonMessage.row] = merged;
         break;
     }
   }, [lastJsonMessage]);
